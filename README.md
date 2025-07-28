@@ -60,14 +60,14 @@ This repository provides a **general-purpose, semantic extraction and summarizat
 
 2. **Build the Docker Image**
 
-docker build --platform linux/amd64 -t adobe_1b_solution:latest .
+docker build -t my-python-app .
 
 3. **Run the Pipeline**
 
-docker run --rm --network none
--v $(pwd)/input:/app/input
--v $(pwd)/output:/app/output
-adobe_1b_solution:latest
+docker run -it --rm ^
+-v "<absolute_path_to_project>\input:/app/input" ^
+-v "<absolute_path_to_project>\output:/app/output" ^
+my-python-app
 
 - Output will be found in the `output/` folder.
 
