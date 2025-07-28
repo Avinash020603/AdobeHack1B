@@ -25,7 +25,7 @@ This repository provides a **general-purpose, semantic extraction and summarizat
 - Selects top-ranked chunks from all PDFs, ensuring topical diversity and balanced document representation.
 
 ### 4. Summarization
-- Chosen chunks are condensed into actionable, readable summaries using an offline abstractive model (e.g., FLAN-T5, DistilBART, T5, or PEGASUS).
+- Chosen chunks are condensed into actionable, readable summaries using an offline abstractive model (bge-small-en, t5-base-finetuned-summarize-news).
 - Summarization module is easily swappable according to size/performance needs.
 
 ### 5. Structured Output
@@ -38,7 +38,7 @@ This repository provides a **general-purpose, semantic extraction and summarizat
 - **PyMuPDF (fitz):** For fast, robust PDF text and heading extraction.
 - **Transformers (HuggingFace):**
   - *Embeddings:* e.g., `bge-small-en`
-  - *Summarization:* `t5-base-finetuned-summarize-news`, `sshleifer/distilbart-cnn-12-6`, `google/flan-t5-small`, etc.
+  - *Summarization:* `t5-base-finetuned-summarize-news`
 - **Scikit-learn:** For cosine similarity and chunk ranking.
 - **NumPy, Sumy (TextRank):** Extractive scoring.
 - **All dependencies local (no internet needed at runtime)**
