@@ -1,84 +1,105 @@
-# Adobe India Hackathon - Round 1B
+# Adobe India Hackathon – Round 1B Solution
 
-1. Overview
-This repository contains our general-purpose semantic extraction and summarization pipeline for Challenge 1B of the Adobe India Hackathon.
-It processes any set of text-based PDF files to select, rank, and summarize the most relevant content according to a persona and job-to-be-done.
+## Overview
 
-Domain-Agnostic: Works with any PDFs (travel, food, business, etc.).
+This repository provides a **general-purpose, semantic extraction and summarization pipeline** for Challenge 1B of the Adobe India Hackathon.
 
-Pretrained models used locally and fully offline.
+- **Domain-agnostic:** Processes any PDF (travel, food, business, etc.)
+- **Works fully offline with locally-stored pretrained models**
+- **Input/output folder-based structure**
+- **Portable, Dockerized (CPU-only, Linux/amd64)**
 
-Flexible input/output folder structure.
+---
 
-Dockerized for portability (CPU-only, Linux/amd64 compliant).
+## Our Approach
 
-2. Our Approach
-a.Dynamic PDF Chunk Extraction
+### 1. Dynamic PDF Chunk Extraction
+- Extracts meaningful text chunks from any PDF using adaptive heading/font-based segmentation.
+- Removes repeated headers/footers via pattern analysis—no hardcoded PDF logic.
 
-->For each input PDF (from /input or as listed in a config JSON), extract meaningful text chunks using heading/font-based segmentation.
+### 2. Semantic Embedding & Ranking
+- Embeds each chunk as dense vectors with a sentence embedding model (BGE-micro or similar).
+- Ranks chunks for relevance to a “job-to-be-done” via cosine similarity to the semantic query.
 
-->Remove repeated headers and footers automatically via pattern analysis.
+### 3. Balanced & Diverse Section Selection
+- Selects top-ranked chunks from all PDFs, ensuring topical diversity and balanced document representation.
 
-b.Semantic Embedding & Ranking
+### 4. Summarization
+- Chosen chunks are condensed into actionable, readable summaries using an offline abstractive model (e.g., FLAN-T5, DistilBART, T5, or PEGASUS).
+- Summarization module is easily swappable according to size/performance needs.
 
-->Each chunk is converted into a dense vector using a sentence embedding model (e.g., BGE-micro or similar).
+### 5. Structured Output
+- Saves output in JSON format: `{ "metadata", "extracted_sections", "subsection_analysis" }`.
 
-->All chunks are scored for relevance to the user-defined "job-to-be-done" via cosine similarity.
+---
 
-c.Balanced & Diverse Section Selection
+## Models and Libraries Used
 
-->Top-ranked chunks are selected with a filter to maximize topical diversity and ensure representation from all input documents.
+- **PyMuPDF (fitz):** For fast, robust PDF text and heading extraction.
+- **Transformers (HuggingFace):**
+  - *Embeddings:* e.g., `bge-small-en`
+  - *Summarization:* `t5-base-finetuned-summarize-news`, `sshleifer/distilbart-cnn-12-6`, `google/flan-t5-small`, etc.
+- **Scikit-learn:** For cosine similarity and chunk ranking.
+- **NumPy, Sumy (TextRank):** Extractive scoring.
+- **All dependencies local (no internet needed at runtime)**
 
-d.Summarization
+---
 
-->Selected chunks are condensed into concise actionable summaries using a locally hosted pretrained abstractive model, depending on disk constraints.
+## How to Build & Run
 
-->The code is easily switched between models like FLAN-T5 (see summarizer module).
+### Prerequisites
 
-e.Output Formatting
+- **Docker** (recommended), or Python 3.8+ with `pip`
+- Place input PDFs in the `input/` folder (project root)
+- Models should be downloaded and saved in the `models/` folder
 
-->Results are saved in the specified output JSON structure, including metadata, extracted_sections, and subsection_analysis arrays.
+### Steps
 
-3.Models and Libraries Used
-a.PyMuPDF (fitz): For robust text extraction and heading detection from PDFs.
+1. **Place Input Files**
+   - Copy your PDFs to the `input/` directory.
 
-Transformers (HuggingFace):
+2. **Build the Docker Image**
 
-For semantic embeddings and summarization:
+docker build --platform linux/amd64 -t adobe_1b_solution:latest .
 
-bge-small-en
+3. **Run the Pipeline**
 
-t5-base-finetuned-summarize-news 
+docker run --rm --network none
+-v $(pwd)/input:/app/input
+-v $(pwd)/output:/app/output
+adobe_1b_solution:latest
 
-Scikit-learn: For vector similarity (cosine) operations.
+- Output will be found in the `output/` folder.
 
-NumPy and Python standard libraries: Array operations, file management, JSON, etc.
+---
+
+## File & Folder Structure
+
+project_root/
+├── main.py
+├── input/ # Place all your PDFs here
+├── output/ # Output JSONs generated here
+├── models/ # All local huggingface model folders
+├── utils/ # Summarization, chunking, utils scripts
+├── requirements.txt
+├── Dockerfile
+└── README.md
 
 
-4.How to Build & Run the Solution
-Prerequisites
-Docker installed (recommended) OR Python 3.8+ with pip for local runs.
 
-All PDFs to process should be placed in input/ folder.
+---
 
-1. Place input files
-Place your PDFs in the input/ directory (at project root).
+## Configuration
 
-Optionally, ensure a config JSON (e.g. challenge1b_input.json) is provided if used by your pipeline.
+- All models are loaded from the `models/` folder; **offline execution only**.
+- No internet required at runtime; all dependencies are bundled in the Docker image.
 
-2. Build Docker image
-   docker build --platform linux/amd64 -t adobe_1b_solution:latest .
+---
 
-3. Run the pipeline
-   docker run --rm --network none \
-  -v $(pwd)/input:/app/input \
-  -v $(pwd)/output:/app/output \
-  adobe_1b_solution:latest
+## Troubleshooting
 
-Output JSON files will be written to the output/ directory.
+- **Missing PDFs:** The pipeline will warn and skip any filenames not present in `input/`.
+- **Model loading errors:** Ensure proper model folders exist in `models/`.
+- **Docker build too large/slow?** Add a `.dockerignore` to filter big files/directories you don’t need inside the image.
 
-The pipeline will automatically process all PDFs found in /app/input or as configured.
-
-4.Configuration
-Models are loaded from the models/ folder for fully offline execution.
-No internet required at runtime. All dependencies are handled within the Docker image.
+---
