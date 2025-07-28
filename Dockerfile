@@ -1,4 +1,4 @@
-FROM python:3.13
+FROM python:3.10-slim
 
 
 ENV PYTHONUNBUFFERED=1
@@ -7,9 +7,7 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
-        python3-dev \
         cmake \
-        pkg-config \
         libgl1-mesa-glx \
         libsm6 \
         libxrender-dev \
@@ -17,17 +15,14 @@ RUN apt-get update && \
         && rm -rf /var/lib/apt/lists/*
 
 
-RUN pip install --upgrade pip
-
+WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 
-WORKDIR /app
-
-
 COPY . /app
+RUN rm -rf /app/input /app/output
 
 
 VOLUME ["/app/input", "/app/output"]
