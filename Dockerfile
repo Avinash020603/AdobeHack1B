@@ -1,3 +1,4 @@
+
 FROM python:3.10-slim
 
 
@@ -17,12 +18,16 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 
+RUN python -c "import nltk; nltk.download('punkt')"
+
+
 COPY . /app
-RUN rm -rf /app/input /app/output
+RUN rm -rf /app/input /app/output  # Avoid overwrite of mounted folders
 
 
 VOLUME ["/app/input", "/app/output"]
