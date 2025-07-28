@@ -13,10 +13,10 @@ from utils.summarize import summarize_text
 from utils.output_format import save_output_json
 from utils.text_utils import clean_repetitive_prefix
 
-INPUT_DIR = "app/input"
-OUTPUT_DIR = "app/output"
-INPUT_FILE = "challenge1b_input.json"
-OUTPUT_FILE = "challenge1b_output.json"
+INPUT_DIR ="input"
+OUTPUT_DIR ="output"
+INPUT_FILE ="challenge1b_input.json"
+OUTPUT_FILE ="challenge1b_output.json"
 
 DIM = 384
 MAX_SELECTED = 5
@@ -40,9 +40,9 @@ def main():
     start_time = time.perf_counter()
     persona, job, pdfs = load_input(os.path.join(INPUT_DIR, INPUT_FILE))
 
-    print(f"👤 Persona: {persona}")
-    print(f"🎯 Job: {job}")
-    print(f"📄 Processing {len(pdfs)} PDFs\n")
+    print(f"Persona: {persona}")
+    print(f"Job: {job}")
+    print(f"Processing {len(pdfs)} PDFs\n")
 
     query = (
         "You are a travel planner organizing a 4-day trip for 10 college friends. "
@@ -51,7 +51,7 @@ def main():
     )
 
     bge_tok, bge_mdl = load_bge_model()
-    print("🔍 Extracting chunks and embedding...")
+    print("Extracting chunks and embedding...")
 
     all_chunks = []
     embeddings = []
@@ -105,7 +105,7 @@ def main():
         m = metadata[idx]
         candidates.append({**m, "score": float(score)})
 
-    # Rerank candidates for better relevance
+    
     for c in candidates:
         c["score"] = calc_score(query, c["text"], bge_mdl, bge_tok)
 
